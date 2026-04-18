@@ -1,0 +1,572 @@
+﻿@model LibraryManagementSystem.ViewModels.SearchViewModel
+
+@{
+    ViewData["Title"] = "Advanced Book Search";
+}
+
+<style>
+    .search-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px 0;
+        border-radius: 0 0 30px 30px;
+        margin-bottom: 40px;
+    }
+    
+    .filter-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+    
+    .filter-label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #4a5568;
+        font-size: 14px;
+    }
+    
+    .filter-input, .filter-select {
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-input:focus, .filter-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+    
+    .search-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        border-radius: 12px;
+        padding: 12px 30px;
+        font-weight: 600;
+        margin-top: 32px;
+        transition: transform 0.2s;
+    }
+    
+    .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .reset-btn {
+        background: #718096;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 30px;
+        font-weight: 600;
+        margin-top: 32px;
+        margin-left: 10px;
+    }
+    
+    /* Grid View Styles - 3 books per row */
+    .books-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+        margin-top: 20px;
+    }
+    
+    .book-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .book-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+    
+    .book-image {
+        height: 220px;
+        background: #f7fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .book-image img {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+    
+    .book-card:hover .book-image img {
+        transform: scale(1.05);
+    }
+    
+    .availability-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        z-index: 1;
+    }
+    
+    .availability-badge.available {
+        background: #10b981;
+        color: white;
+    }
+    
+    .availability-badge.issued {
+        background: #ef4444;
+        color: white;
+    }
+    
+    .book-info {
+        padding: 18px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .book-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 8px;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .book-authors {
+        font-size: 13px;
+        color: #718096;
+        margin-bottom: 10px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .book-genre {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        width: fit-content;
+    }
+    
+    .book-details {
+        margin-top: auto;
+    }
+    
+    .book-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 12px;
+        font-size: 12px;
+        color: #4a5568;
+    }
+    
+    .book-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .book-description {
+        font-size: 13px;
+        color: #718096;
+        line-height: 1.4;
+        margin-bottom: 15px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .book-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .btn-details {
+        flex: 1;
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #667eea;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .btn-details:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+    
+    .btn-borrow {
+        flex: 1;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        border-radius: 10px;
+        padding: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .btn-borrow:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+    
+    .btn-borrow.disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+    
+    .stats-bar {
+        background: #f7fafc;
+        border-radius: 12px;
+        padding: 15px 20px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .result-count {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .result-count span {
+        color: #667eea;
+        font-size: 24px;
+        font-weight: 700;
+    }
+    
+    .pagination {
+        justify-content: center;
+        margin-top: 30px;
+    }
+    
+    .page-link {
+        border-radius: 10px;
+        margin: 0 3px;
+        color: #667eea;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-color: #667eea;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: #f7fafc;
+        border-radius: 20px;
+    }
+    
+    .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+    }
+    
+    /* Responsive */
+    @@media (max-width: 992px) {
+        .books-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+    }
+    
+    @@media (max-width: 576px) {
+        .books-grid {
+            grid-template-columns: 1fr;
+        }
+        .search-btn, .reset-btn {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .reset-btn {
+            margin-left: 0;
+        }
+    }
+</style>
+
+<div class="search-hero">
+    <div class="container">
+        <h1 class="text-center text-white mb-2">🔍 Advanced Book Search</h1>
+        <p class="text-center text-white-50">Find your next favorite book by title, author, genre, and more</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Search Filters -->
+    <div class="filter-card">
+        <form method="get" asp-action="Index" id="searchForm">
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label class="filter-label">
+                        <i class="fas fa-search"></i> Search by Title or ISBN
+                    </label>
+                    <input type="text" class="form-control filter-input" name="searchText" 
+                           placeholder="Enter book title, author name, or ISBN..." 
+                           value="@Model.SearchText" />
+                </div>
+
+                <div class="col-md-4">
+                    <label class="filter-label">
+                        <i class="fas fa-user"></i> Author
+                    </label>
+                    <select name="authorId" class="form-select filter-select" asp-items="Model.Authors">
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="filter-label">
+                        <i class="fas fa-tag"></i> Genre
+                    </label>
+                    <select name="genreId" class="form-select filter-select" asp-items="Model.Genres">
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="filter-label">
+                        <i class="fas fa-building"></i> Publication
+                    </label>
+                    <select name="publication" class="form-select filter-select" asp-items="Model.PublicationsList">
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="filter-label">
+                        <i class="fas fa-file-alt"></i> Max Page Count
+                    </label>
+                    <input type="number" class="form-control filter-input" name="maxPages" 
+                           placeholder="e.g., 500" value="@Model.MaxPages" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="filter-label">
+                        <i class="fas fa-calendar"></i> Published Year
+                    </label>
+                    <input type="number" class="form-control filter-input" name="publishedYear" 
+                           placeholder="e.g., 2020" value="@Model.PublishedYear" />
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" class="btn search-btn text-white">
+                        <i class="fas fa-search me-2"></i> Search Books
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn reset-btn text-white">
+                        <i class="fas fa-sync-alt me-2"></i> Reset Filters
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Search Results - Grid View (3 per row) -->
+    @if (Model.Results != null && Model.Results.Any())
+    {
+        <div class="stats-bar">
+            <div class="result-count">
+                📚 Found <span>@Model.TotalCount</span> books matching your criteria
+            </div>
+            <div>
+                <small class="text-muted">
+                    Page @Model.PageNumber of @Model.TotalPages
+                </small>
+            </div>
+        </div>
+
+        <div class="books-grid">
+            @foreach (var book in Model.Results)
+            {
+                <div class="book-card">
+                    <div class="book-image">
+                        <img src="@book.Image" alt="@book.Title"
+                             onerror="this.src='/images/default-book.jpg'" />
+                        <div class="availability-badge @(book.IsAvailable ? "available" : "issued")">
+                            @(book.IsAvailable ? "Available" : "Issued")
+                        </div>
+                    </div>
+                    <div class="book-info">
+                        <h3 class="book-title">@book.Title</h3>
+                        <div class="book-authors">
+                            <i class="fas fa-user"></i> @book.Authors
+                        </div>
+                        <div>
+                            <span class="book-genre">@book.Genre</span>
+                        </div>
+                        <div class="book-meta">
+                            <span class="book-meta-item">
+                                <i class="fas fa-building"></i> @book.Publication
+                            </span>
+                            <span class="book-meta-item">
+                                <i class="fas fa-calendar"></i> @book.PublishedYear
+                            </span>
+                            <span class="book-meta-item">
+                                <i class="fas fa-file-alt"></i> @book.Pages pgs
+                            </span>
+                        </div>
+                        <div class="book-description">
+                            @if (!string.IsNullOrEmpty(book.ShortDesc))
+                            {
+                                @(book.ShortDesc.Length > 100 ? book.ShortDesc.Substring(0, 100) + "..." : book.ShortDesc)
+                            }
+                            else
+                            {
+                                <em class="text-muted">No description available.</em>
+                            }
+                        </div>
+                        <div class="book-actions">
+                            <a href="/Book/Details/@book.Id" class="btn-details">
+                                <i class="fas fa-eye"></i> Details
+                            </a>
+                            @if (book.IsAvailable)
+                            {
+                                <a href="/Booking/Issue?bookId=@book.Id" class="btn-borrow">
+                                    <i class="fas fa-hand-holding"></i> Borrow
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="#" class="btn-borrow disabled">
+                                    <i class="fas fa-clock"></i> Unavailable
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <nav>
+                <ul class="pagination">
+                    @if (Model.PageNumber > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="@(Model.PageNumber - 1)">
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </a>
+                        </li>
+                    }
+                    
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        if (i == Model.PageNumber)
+                        {
+                            <li class="page-item active">
+                                <span class="page-link">@i</span>
+                            </li>
+                        }
+                        else if (Math.Abs(i - Model.PageNumber) <= 2 || i == 1 || i == Model.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="#" data-page="@i">@i</a>
+                            </li>
+                        }
+                        else if (Math.Abs(i - Model.PageNumber) == 3)
+                        {
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        }
+                    }
+                    
+                    @if (Model.PageNumber < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="@(Model.PageNumber + 1)">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else if (Model.SearchText != null || Model.AuthorId.HasValue || Model.GenreId.HasValue || 
+             !string.IsNullOrEmpty(Model.Publication) || Model.MaxPages.HasValue || Model.PublishedYear.HasValue)
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">📖</div>
+            <h4>No books found</h4>
+            <p class="text-muted">Try adjusting your search filters or browse all books instead.</p>
+            <a href="@Url.Action("Index")" class="btn btn-primary rounded-pill">
+                <i class="fas fa-sync-alt me-2"></i> Clear All Filters
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">🔍</div>
+            <h4>Start your search</h4>
+            <p class="text-muted">Use the filters above to search for books by title, author, genre, publication, and more.</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Pagination
+        document.querySelectorAll('.page-link[data-page]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = this.getAttribute('data-page');
+                if (page) {
+                    const pageInput = document.createElement('input');
+                    pageInput.type = 'hidden';
+                    pageInput.name = 'page';
+                    pageInput.value = page;
+                    document.getElementById('searchForm').appendChild(pageInput);
+                    document.getElementById('searchForm').submit();
+                }
+            });
+        });
+        
+        // Auto submit on dropdown change
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', function() {
+                document.getElementById('searchForm').submit();
+            });
+        });
+    </script>
+}

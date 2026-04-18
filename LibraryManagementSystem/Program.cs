@@ -10,8 +10,31 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<LmsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
+builder.Services.AddTransient<DataSeeder>();
+
+
+
+builder.Services.AddDistributedMemoryCache(); 
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); 
+    options.Cookie.HttpOnly = true; 
+    options.Cookie.IsEssential = true;
+    options.Cookie.Name = ".LMS.Session";
+});
+
+builder.Services.AddHttpContextAccessor();
+
+
 var app = builder.Build();
 
+
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
+    await seeder.SeedAllAsync();
+}
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -22,7 +45,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.UseSession(); 
 app.UseRouting();
 
 app.UseAuthorization();

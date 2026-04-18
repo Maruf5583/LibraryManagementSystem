@@ -1,8 +1,485 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model LibraryManagementSystem.ViewModels.VmHomePage
+
+@{
+    ViewData["Title"] = "Home Page - Library Management System";
+    var today = DateTime.Today;  // View এ DateTime.Today ব্যবহার করুন
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero Section -->
+<div class="hero-section text-center mb-5">
+    <div class="container">
+        <h1 class="display-4 fw-bold">📚 Welcome to Library Management System</h1>
+        <p class="lead">Your Gateway to Knowledge & Discovery</p>
+        <div class="search-box mx-auto mt-4" style="max-width: 550px;">
+            <form method="get" action="/Book/Search">
+                <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                    <input type="text" class="form-control border-0 py-2" name="query" placeholder="Search books by title, author, or genre..." style="padding-left: 20px;">
+                    <button class="btn btn-primary px-4" type="submit" style="background: linear-gradient(135deg, #667eea, #764ba2); border: none;">
+                        🔍 Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+<div class="container mt-4">
+    <!-- Featured Section: Best Rated + Most Recommended -->
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3><i class="fas fa-star text-warning"></i> ⭐ Best Rated Books</h3>
+                <a href="/Book/TopRated" class="btn btn-sm btn-outline-primary">View All →</a>
+            </div>
+            <div class="list-group">
+                @if (Model.TopRatedBooks != null && Model.TopRatedBooks.Any())
+                {
+                    @foreach (var book in Model.TopRatedBooks.Take(5))
+                    {
+                        <div class="list-group-item list-group-item-action border-0 rounded-3 mb-2 shadow-sm">
+                            <div class="d-flex">
+                                <img src="@book.CoverImage" style="width: 50px; height: 65px; object-fit: cover; border-radius: 8px;" onerror="this.src='/images/default-book.jpg'">
+                                <div class="ms-3 flex-grow-1">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>@book.Title</strong>
+                                        <span class="text-warning">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                @(i <= (book.AverageRating ?? 0) ? "★" : "☆")
+                                            }
+                                            <span class="text-muted ms-1">(@book.AverageRating?.ToString("F1"))</span>
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">@book.ReviewCount reviews</small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-info">No rated books yet.</div>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3><i class="fas fa-thumbs-up text-success"></i> 👍 Most Recommended</h3>
+                <a href="/Book/Recommended" class="btn btn-sm btn-outline-primary">View All →</a>
+            </div>
+            <div class="list-group">
+                @if (Model.MostRecommendedBooks != null && Model.MostRecommendedBooks.Any())
+                {
+                    @foreach (var book in Model.MostRecommendedBooks.Take(5))
+                    {
+                        <div class="list-group-item list-group-item-action border-0 rounded-3 mb-2 shadow-sm">
+                            <div class="d-flex">
+                                <img src="@book.CoverImage" style="width: 50px; height: 65px; object-fit: cover; border-radius: 8px;" onerror="this.src='/images/default-book.jpg'">
+                                <div class="ms-3 flex-grow-1">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>@book.Title</strong>
+                                        <span class="badge bg-success rounded-pill">@book.Count recommendations</span>
+                                    </div>
+                                    <small class="text-muted">Recommended by @book.Count members</small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-info">No recommendations yet.</div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content - New Arrivals -->
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">
+                    <span class="badge bg-danger rounded-pill me-2">🔥</span>
+                    New Arrivals
+                </h2>
+                <a href="/Book" class="btn btn-outline-primary btn-sm rounded-pill">
+                    View All Books →
+                </a>
+            </div>
+            
+            @if (Model.NewArrivals != null && Model.NewArrivals.Any())
+            {
+                <div class="row">
+                    @foreach (var book in Model.NewArrivals)
+                    {
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden book-card">
+                                <div class="row g-0 h-100">
+                                    <div class="col-md-4 bg-light d-flex align-items-center justify-content-center" style="min-height: 180px;">
+                                        @if (!string.IsNullOrEmpty(book.CoverImage) && book.CoverImage != "/images/default-book.jpg")
+                                        {
+                                            <img src="@book.CoverImage" class="img-fluid rounded-start"
+                                                 style="height: 170px; width: 100%; object-fit: cover;"
+                                                 onerror="this.src='/images/default-book.jpg'"
+                                                 alt="@book.Title">
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center p-3">
+                                                <i class="fas fa-book fa-3x text-muted"></i>
+                                                <p class="small text-muted mt-2 mb-0">No Cover</p>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="card-body">
+                                            <h5 class="card-title fw-bold">@book.Title</h5>
+                                            <div class="mb-2">
+                                                <span class="badge bg-info text-dark rounded-pill">@book.Genre</span>
+                                            </div>
+                                            <p class="card-text small mb-2">
+                                                <i class="fas fa-user-edit text-muted"></i>
+                                                <strong>Authors:</strong> @book.Authors
+                                                <br />
+                                                <i class="fas fa-building text-muted"></i>
+                                                <strong>Publication:</strong> @book.Publication
+                                            </p>
+                                            <a href="/Book/Details/@book.Id" class="btn btn-sm btn-primary rounded-pill mt-2">
+                                                View Details <i class="fas fa-arrow-right ms-1"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info text-center rounded-4">
+                    <i class="fas fa-info-circle fa-2x mb-2"></i>
+                    <p class="mb-0">No new arrivals found. Add some books to get started!</p>
+                </div>
+            }
+
+            <!-- Upcoming Books Section -->
+            <div class="mt-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">
+                        <span class="badge bg-success rounded-pill me-2">📅</span>
+                        Coming Soon
+                    </h2>
+                    <a href="/Book/Upcoming" class="btn btn-sm btn-outline-success rounded-pill">
+                        View All →
+                    </a>
+                </div>
+                
+                @if (Model.UpcomingBooks != null && Model.UpcomingBooks.Any())
+                {
+                    <div class="row">
+                        @foreach (var book in Model.UpcomingBooks)
+                        {
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100 shadow-sm border-0 rounded-4 upcoming-card">
+                                    <div class="position-relative">
+                                        <img src="@book.CoverImage" class="card-img-top"
+                                             style="height: 200px; object-fit: cover; border-radius: 15px 15px 0 0;"
+                                             onerror="this.src='/images/default.jpg'">
+                                        <span class="position-absolute top-0 end-0 badge bg-success m-2">
+                                            Coming @(book.ExpectedDate?.ToString("MMM yyyy") ?? "Soon")
+                                        </span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-title fw-bold">@book.Title</h6>
+                                        <p class="card-text small text-muted">@book.Authors</p>
+                                        <button class="btn btn-sm btn-outline-success rounded-pill w-100" disabled>
+                                            <i class="fas fa-bell me-1"></i> Notify Me
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-light text-center rounded-4">
+                        <i class="fas fa-calendar-alt fa-2x mb-2 text-muted"></i>
+                        <p class="mb-0">No upcoming books announced yet.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Genre Statistics -->
+            <div class="card shadow-sm mb-4 border-0 rounded-4">
+                <div class="card-header bg-primary text-white rounded-top-4">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i> Books by Genre</h5>
+                </div>
+                <div class="card-body p-3">
+                    @if (Model.GenreWiseStats != null && Model.GenreWiseStats.Any())
+                    {
+                        var maxCount = Model.GenreWiseStats.Max(g => g.BookCount);
+                        var genreIcons = new Dictionary<string, string>
+                        {
+                            {"Technology", "💻"}, {"Fiction", "📖"}, {"History", "🏛️"},
+                            {"Science", "🔬"}, {"Travel", "✈️"}, {"Biography", "👤"},
+                            {"Recipe", "🍳"}, {"Health", "💪"}, {"Mystery", "🕵️"},
+                            {"Romance", "💕"}, {"Thriller", "🔪"}, {"Fantasy", "🐉"}
+                        };
+                        
+                        foreach (var genre in Model.GenreWiseStats.Take(8))
+                        {
+                            var percentage = maxCount > 0 ? (double)genre.BookCount / maxCount * 100 : 0;
+                            var icon = genreIcons.ContainsKey(genre.GenreName) ? genreIcons[genre.GenreName] : "📚";
+                            
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <div>
+                                        <span class="me-2">@icon</span>
+                                        <span class="fw-semibold">@genre.GenreName</span>
+                                    </div>
+                                    <span class="badge bg-secondary rounded-pill">@genre.BookCount</span>
+                                </div>
+                                <div class="progress" style="height: 8px; border-radius: 10px;">
+                                    <div class="progress-bar" role="progressbar"
+                                         style="width: @percentage%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 10px;">
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">No genres found.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Most Reserved Books -->
+            <div class="card shadow-sm mb-4 border-0 rounded-4">
+                <div class="card-header bg-info text-white rounded-top-4">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> Most Reserved</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.MostReservedBooks != null && Model.MostReservedBooks.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @{
+                                var reservedBooks = Model.MostReservedBooks.Take(5).ToList();
+                            }
+                            @for (int i = 0; i < reservedBooks.Count; i++)
+                            {
+                                var book = reservedBooks[i];
+                                <div class="list-group-item border-0 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-danger rounded-circle me-2" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">@(i + 1)</span>
+                                        <div class="flex-grow-1">
+                                            <strong class="d-block">@book.Title</strong>
+                                            <small class="text-muted">@book.Count reservations</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted mb-0">No reservations yet.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Returning Books - DateOnly fixed -->
+            <div class="card shadow-sm mb-4 border-0 rounded-4">
+                <div class="card-header bg-warning text-dark rounded-top-4">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i> Due This Week</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.ReturningBooks != null && Model.ReturningBooks.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var book in Model.ReturningBooks)
+                            {
+                                // DateOnly to DateTime conversion for calculation
+                                var returnDateTime = book.ReturnDate.ToDateTime(TimeOnly.MinValue);
+                                var daysLeft = (returnDateTime - DateTime.Today).Days;
+                                var badgeClass = daysLeft <= 2 ? "bg-danger" : "bg-warning";
+                                var daysText = daysLeft <= 0 ? "Overdue" : $"{daysLeft} days left";
+                                
+                                <div class="list-group-item border-0 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <img src="@book.CoverImage" style="width: 45px; height: 60px; object-fit: cover; border-radius: 8px;" onerror="this.src='/images/default-book.jpg'">
+                                        </div>
+                                        <div class="ms-3 flex-grow-1">
+                                            <strong class="d-block">@book.BookTitle</strong>
+                                            <small class="text-muted">@book.MemberName</small>
+                                            <div>
+                                                <span class="badge @badgeClass mt-1">@daysText</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                            <p class="text-muted mb-0">All books returned on time! 🎉</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card shadow-sm border-0 rounded-4 text-white"
+                 style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                <div class="card-body p-4">
+                    <h5 class="mb-3 text-center"><i class="fas fa-chart-line me-2"></i> Library at a Glance</h5>
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="stat-circle bg-white bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                                 style="width: 60px; height: 60px;">
+                                <i class="fas fa-book fa-2x"></i>
+                            </div>
+                            <h3 class="mb-0 fw-bold">@Model.TotalBooks</h3>
+                            <small class="opacity-75">Total Books</small>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="stat-circle bg-white bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                                 style="width: 60px; height: 60px;">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                            <h3 class="mb-0 fw-bold">@Model.TotalMembers</h3>
+                            <small class="opacity-75">Active Members</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-circle bg-white bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                                 style="width: 60px; height: 60px;">
+                                <i class="fas fa-star fa-2x"></i>
+                            </div>
+                            <h3 class="mb-0 fw-bold">@Model.TotalReviews</h3>
+                            <small class="opacity-75">Reviews</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-circle bg-white bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                                 style="width: 60px; height: 60px;">
+                                <i class="fas fa-book-open fa-2x"></i>
+                            </div>
+                            <h3 class="mb-0 fw-bold">@Model.CurrentlyIssued</h3>
+                            <small class="opacity-75">Books Issued</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 0;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+            background-size: cover;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+    
+    .book-card, .upcoming-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+        .book-card:hover, .upcoming-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15) !important;
+        }
+    
+    .stat-circle {
+        transition: transform 0.3s ease;
+    }
+    
+        .stat-circle:hover {
+            transform: scale(1.1);
+        }
+    
+    .progress-bar {
+        transition: width 1s ease-in-out;
+    }
+    
+    .list-group-item {
+        transition: all 0.2s ease;
+    }
+    
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+        }
+    
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+    
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+</style>
+
+@section Scripts {
+    <script>
+        // Animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.card, .list-group-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+}

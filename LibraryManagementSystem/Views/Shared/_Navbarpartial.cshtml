@@ -1,0 +1,153 @@
+﻿@using LibraryManagementSystem.Helper
+@using LibraryManagementSystem.ViewModels
+
+@{
+    var currentUser = SessionHelper.GetUser(Context);
+    var isLoggedIn = currentUser != null;
+    var roleName = currentUser?.RoleName ?? "";
+}
+
+<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="/">📚 LMS</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarColor01">
+            @if (isLoggedIn)
+            {
+                <!-- LEFT MENU -->
+                <ul class="navbar-nav me-auto">
+                    <!-- COMMON -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Dashboard</a>
+                    </li>
+
+                    <!-- ================= ADMIN ================= -->
+                    @if (roleName == "Admin")
+                    {
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-action="index" asp-controller="search">AdvancedSearch</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Books</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="/Book">Book List</a>
+                                <a class="dropdown-item" asp-action="Create" asp-controller="Book">Add Book</a>
+                                <a class="dropdown-item" href="/BookCopy">Book Copies</a>
+                                <a class="dropdown-item" href="/Genre">Genres</a>
+                                <a class="dropdown-item" href="/Author">Authors</a>
+                            </div>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Members</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="/Member">Member List</a>
+                                <a class="dropdown-item" href="/Member/Create">Add Member</a>
+                                <a class="dropdown-item" href="/Role">Roles</a>
+                                <a class="dropdown-item" href="/Subscription">Subscriptions</a>
+                            </div>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Circulation</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="/Booking/Issue">Issue Book</a>
+                                <a class="dropdown-item" href="/Booking/Return">Return Book</a>
+                                <a class="dropdown-item" href="/Booking">Active Bookings</a>
+                                <a class="dropdown-item" href="/Booking/Overdue">Overdue</a>
+                            </div>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Reports">Reports</a>
+                        </li>
+                    }
+
+                    <!-- ================= LIBRARIAN ================= -->
+                    @if (roleName == "Librarian")
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Books</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="/Book">Book List</a>
+                                <a class="dropdown-item" href="/BookCopy">Book Copies</a>
+                                <a class="dropdown-item" href="/Genre">Genres</a>
+                            </div>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Member">Members</a>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Circulation</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="/Booking/Issue">Issue Book</a>
+                                <a class="dropdown-item" href="/Booking/Return">Return Book</a>
+                                <a class="dropdown-item" href="/Booking">Active Bookings</a>
+                            </div>
+                        </li>
+                    }
+
+                    <!-- ================= MEMBER ================= -->
+                    @if (roleName == "Member")
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Book/Browse">Browse Books</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/My/Bookings">My Books</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Review/My">My Reviews</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Subscription/My">My Subscription</a>
+                        </li>
+                    }
+                </ul>
+
+                <!-- SEARCH FORM -->
+                <form class="d-flex me-3" method="get" action="/Book/Search">
+                    <input class="form-control me-sm-2" type="search" name="query" placeholder="Search books...">
+                    <button class="btn btn-info" type="submit">Search</button>
+                </form>
+
+                <!-- USER MENU -->
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                            👤 @currentUser?.MemberName
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="/Account/Profile">Profile</a>
+                            <a class="dropdown-item" href="/Account/ChangePassword">Change Password</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="/Account/Logout">Logout</a>
+                        </div>
+                    </li>
+                </ul>
+            }
+            else
+            {
+                <!-- NOT LOGGED IN -->
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Account/Register">Register</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Account/Login">Login</a>
+                    </li>
+                </ul>
+            }
+        </div>
+    </div>
+</nav>

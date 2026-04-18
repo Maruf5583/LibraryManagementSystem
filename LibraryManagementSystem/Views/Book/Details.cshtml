@@ -1,0 +1,230 @@
+﻿@model LibraryManagementSystem.ViewModels.BookDetailViewModel
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<style>
+    .book-detail-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .book-cover {
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .rating-stars {
+        color: #ffc107;
+        font-size: 20px;
+    }
+    
+    .info-card {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .review-card {
+        border-left: 3px solid #667eea;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .related-book-card {
+        text-align: center;
+        transition: transform 0.3s;
+        margin-bottom: 20px;
+    }
+    
+        .related-book-card:hover {
+            transform: translateY(-5px);
+        }
+    
+        .related-book-card img {
+            border-radius: 8px;
+            height: 150px;
+            object-fit: cover;
+            width: 100%;
+        }
+    
+    .availability-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    
+    .badge-available {
+        background: #10b981;
+        color: white;
+    }
+    
+    .badge-unavailable {
+        background: #ef4444;
+        color: white;
+    }
+</style>
+
+<div class="book-detail-container">
+    <div class="row">
+        <!-- Left Column - Book Cover -->
+        <div class="col-md-4 text-center">
+            <img src="@Model.Image" class="book-cover img-fluid" alt="@Model.Title"
+                 onerror="this.src='/images/default-book.jpg'" />
+            
+            <div class="mt-3">
+                @if (Model.IsAvailable)
+                {
+                    <span class="availability-badge badge-available">
+                        <i class="fas fa-check-circle"></i> Available (@Model.AvailableCopies/@Model.TotalCopies copies)
+                    </span>
+                }
+                else
+                {
+                    <span class="availability-badge badge-unavailable">
+                        <i class="fas fa-times-circle"></i> Currently Unavailable
+                    </span>
+                }
+            </div>
+            
+            @if (Model.IsAvailable)
+            {
+                <a href="/Booking/Issue?bookId=@Model.Id" class="btn btn-primary btn-lg w-100 mt-3">
+                    <i class="fas fa-hand-holding"></i> Borrow This Book
+                </a>
+            }
+            
+            <a href="/Book" class="btn btn-outline-secondary w-100 mt-2">
+                <i class="fas fa-arrow-left"></i> Back to Books
+            </a>
+        </div>
+
+        <!-- Right Column - Book Details -->
+        <div class="col-md-8">
+            <h1 class="display-5 fw-bold">@Model.Title</h1>
+            
+            <div class="mb-3">
+                <span class="rating-stars">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        @(i <= Model.AverageRating ? "★" : "☆")
+                    }
+                </span>
+                <span class="text-muted ms-2">
+                    @Model.AverageRating.ToString("F1") stars · @Model.TotalReviews reviews
+                </span>
+            </div>
+
+            <div class="info-card">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-user"></i> Authors:</strong><br />
+                        @foreach (var author in Model.Authors)
+                        {
+                            <span>@author.Name</span>
+                        
+                            <br />
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-tag"></i> Genre:</strong><br />
+                        <span>@Model.Genre</span>
+                    </div>
+                    <div class="col-md-6 mt-2">
+                        <strong><i class="fas fa-building"></i> Publication:</strong><br />
+                        <span>@Model.Publication</span>
+                    </div>
+                    <div class="col-md-6 mt-2">
+                        <strong><i class="fas fa-calendar"></i> Published Year:</strong><br />
+                        <span>@Model.PublishedYear</span>
+                    </div>
+                    <div class="col-md-6 mt-2">
+                        <strong><i class="fas fa-file-alt"></i> Pages:</strong><br />
+                        <span>@Model.Pages pages</span>
+                    </div>
+                    <div class="col-md-6 mt-2">
+                        <strong><i class="fas fa-barcode"></i> ISBN:</strong><br />
+                        <span>@Model.Isbn</span>
+                    </div>
+                    @if (Model.Length.HasValue || Model.Width.HasValue || Model.Height.HasValue)
+                    {
+                        <div class="col-md-6 mt-2">
+                            <strong><i class="fas fa-ruler"></i> Dimensions:</strong><br />
+                            <span>@(Model.Length?.ToString("F1") ?? "-")" x @(Model.Width?.ToString("F1") ?? "-")" x @(Model.Height?.ToString("F1") ?? "-")"</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h4><i class="fas fa-book-open"></i> Description</h4>
+                <p class="text-muted">@Model.ShortDesc</p>
+            </div>
+
+            <!-- Reviews Section -->
+            <div class="mt-4">
+                <h4><i class="fas fa-star"></i> Reviews (@Model.TotalReviews)</h4>
+                @if (Model.Reviews.Any())
+                {
+                    foreach (var review in Model.Reviews)
+                    {
+                        <div class="review-card">
+                            <div class="d-flex justify-content-between">
+                                <strong>@review.MemberName</strong>
+                                <small class="text-muted">@review.ReviewedOn.ToString("MMM dd, yyyy")</small>
+                            </div>
+                            <div class="rating-stars" style="font-size: 14px;">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    @(i <= review.Rating ? "★" : "☆")
+                                }
+                                @if (review.IsRecommended)
+                                {
+                                    <span class="badge bg-success ms-2">Recommended</span>
+                                }
+                            </div>
+                            <p class="mt-2 mb-0">"@review.Comment"</p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">No reviews yet. Be the first to review this book!</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Books Section -->
+    @if (Model.RelatedBooks.Any())
+    {
+        <div class="mt-5">
+            <h3 class="mb-4"><i class="fas fa-bookmark"></i> You May Also Like</h3>
+            <div class="row">
+                @foreach (var book in Model.RelatedBooks)
+                {
+                    <div class="col-md-3">
+                        <div class="related-book-card">
+                            <a href="/Book/Details/@book.Id">
+                                <img src="@book.Image" class="img-fluid" alt="@book.Title"
+                                     onerror="this.src='/images/default-book.jpg'" />
+                                <h6 class="mt-2 text-truncate">@book.Title</h6>
+                                <small class="text-muted">@book.Authors</small><br />
+                                <small class="text-muted">@book.Genre</small>
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
